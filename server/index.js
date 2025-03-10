@@ -4,7 +4,15 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000', // local frontend
+    'https://your-vercel-app-url.vercel.app', // add your Vercel URL once deployed
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -112,6 +120,10 @@ io.on('connection', (socket) => {
       }
     });
   });
+});
+
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend is connected!' });
 });
 
 const PORT = process.env.PORT || 5000;
