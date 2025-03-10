@@ -1,0 +1,108 @@
+version: 2
+updates:
+  # Frontend (client) dependencies
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "automated"
+    reviewers:
+      - "Prthmsh7"  # Add your GitHub username here
+    assignees:
+      - "Prthmsh7"  # Add your GitHub username here
+    commit-message:
+      prefix: "📦 deps(client)"
+      prefix-development: "🔧 dev-deps(client)"
+      include: "scope"
+    # Group dependencies together
+    groups:
+      react-packages:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      material-ui:
+        patterns:
+          - "@mui/*"
+    # Ignore certain updates
+    ignore:
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]  # Ignore major React updates
+    versioning-strategy: increase
+
+  # Backend (server) dependencies
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "backend"
+      - "automated"
+    reviewers:
+      - "Prthmsh7"  # Add your GitHub username here
+    assignees:
+      - "Prthmsh7"  # Add your GitHub username here
+    commit-message:
+      prefix: "📦 deps(server)"
+      prefix-development: "🔧 dev-deps(server)"
+      include: "scope"
+    # Group dependencies together
+    groups:
+      express-packages:
+        patterns:
+          - "express*"
+      socket-packages:
+        patterns:
+          - "socket.io*"
+    # Security updates get priority
+    security-updates-only: false
+    versioning-strategy: increase
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    reviewers:
+      - "Prthmsh7"  # Add your GitHub username here
+    commit-message:
+      prefix: "👷 ci"
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  # Docker dependencies (if you add Docker later)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    ignore:
+      - dependency-name: "node"
+        versions: ["15.x", "16.x"]  # Stick to LTS versions
+
+# Pull request settings
+pull-request-branch-name:
+  separator: "-" 
