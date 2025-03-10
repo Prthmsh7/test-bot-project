@@ -9,7 +9,7 @@ A simple real-time chat application built with React, Express, and Socket.IO. Us
 - User presence notifications
 - Modern Material-UI interface
 - Responsive design
-
+- 
 ## Prerequisites
 
 - Node.js (v14 or higher)
