@@ -21,7 +21,14 @@ import SendIcon from '@mui/icons-material/Send';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
-const socket = io('https://test-bot-project-server.onrender.com');
+// Initialize socket with options
+const socket = io('https://test-bot-project-server.onrender.com', {
+  transports: ['websocket', 'polling'],
+  withCredentials: true,
+  extraHeaders: {
+    'Access-Control-Allow-Origin': 'https://test-bot'
+  },
+});
 
 function App() {
   const [username, setUsername] = useState('');
