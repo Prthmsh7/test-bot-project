@@ -23,11 +23,17 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 // Initialize socket with options
 const socket = io('https://test-bot-project-server.onrender.com', {
-  transports: ['websocket', 'polling'],
   withCredentials: true,
-  extraHeaders: {
-    'Access-Control-Allow-Origin': 'https://test-bot'
-  },
+  transports: ['websocket', 'polling']
+});
+
+// Add error handling
+socket.on('connect_error', (error) => {
+  console.log('Connection error:', error.message);
+});
+
+socket.on('connect', () => {
+  console.log('Connected successfully!');
 });
 
 function App() {
