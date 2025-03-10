@@ -4,27 +4,20 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 
 const app = express();
-app.use(cors({
-  origin: [
-    'http://localhost:3000', // local frontend
-    'https://your-vercel-app-url.vercel.app', // add your Vercel URL once deployed
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+const server = http.createServer(app);
+
+// Updated CORS configuration
+app.use(cors());
 
 // Body parser middleware
 app.use(express.json());
 
-const server = http.createServer(app);
+// Socket.IO setup with proper CORS
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:3000',
-      'https://test-bot-project.vercel.app' // Add your Vercel frontend URL
-    ],
-    methods: ['GET', 'POST'],
+    origin: ["https://test-bot-project.vercel.app", "http://localhost:3000"],
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
     credentials: true
   }
 });
@@ -42,8 +35,14 @@ function generateRoomCode() {
   return code;
 }
 
+// Socket events
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  
+  socket.on('create-room', (roomData) => {
+    console.log('Room creation requested:', roomData);
+    // Your room creation logic
+  });
 
   // Create a new room
   socket.on('create_room', (username) => {
@@ -127,6 +126,10 @@ io.on('connection', (socket) => {
       }
     });
   });
+});
+
+app.get('/', (req, res) => {
+  res.send('Server is running');
 });
 
 app.get('/api/test', (req, res) => {
