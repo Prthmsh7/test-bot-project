@@ -14,7 +14,7 @@ A simple real-time chat application built with React, Express, and Socket.IO. Us
 
 - Node.js (v14 or higher)
 - npm (v6 or higher)
-
+  
 ## Setup
 
 1. Clone the repository
