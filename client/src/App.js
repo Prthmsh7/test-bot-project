@@ -21,7 +21,7 @@ import SendIcon from '@mui/icons-material/Send';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://test-bot-project-server.onrender.com');
 
 function App() {
   const [username, setUsername] = useState('');
