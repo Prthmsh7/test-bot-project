@@ -15,7 +15,7 @@ app.use(express.json());
 // Socket.IO setup with proper CORS
 const io = new Server(server, {
   cors: {
-    origin: ["https://test-bot-project.vercel.app", "http://localhost:3000"],
+    origin: ["http://localhost:3000","https://test-bot-project.vercel.app",],
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true
