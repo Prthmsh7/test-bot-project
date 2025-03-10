@@ -1,0 +1,58 @@
+name: PR Review Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: PR Review
+        uses: reviewdog/action-suggester@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: PR-Review-Bot
+
+      - name: Code Analysis
+        uses: microsoft/DevSkim-Action@v1
+
+      - name: Security Check
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Lint Check
+        run: |
+          cd client && npm install && npm run lint
+          cd ../server && npm install && npm run lint
+
+      - name: Add PR Comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo, number } = context.issue;
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: `👋 Thanks for the PR! I've reviewed it and here's my feedback:
+              
+              ✅ Code style check completed
+              ✅ Security check completed
+              ✅ Lint check completed
+              
+              Please make sure to:
+              - [ ] Add tests if needed
+              - [ ] Update documentation if needed
+              - [ ] Check console for any warnings
+              
+              Let me know if you need any help! ��`
+            }); 

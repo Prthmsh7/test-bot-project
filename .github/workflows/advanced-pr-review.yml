@@ -1,0 +1,118 @@
+name: Advanced PR Review Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Fetch all history for better analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      # Step 1: Code Quality Analysis
+      - name: Code Quality Check
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          eslint_flags: 'client/src/ server/'
+
+      # Step 2: Security Scanning
+      - name: Security Audit
+        run: |
+          cd client && npm audit
+          cd ../server && npm audit
+
+      # Step 3: Test Coverage
+      - name: Run Tests with Coverage
+        run: |
+          cd client
+          npm install
+          npm run test -- --coverage --watchAll=false
+          cd ../server
+          npm install
+          npm run test -- --coverage --watchAll=false
+
+      # Step 4: Performance Check
+      - name: Bundle Size Check
+        run: |
+          cd client
+          npm run build
+          echo "Checking bundle size..."
+          ls -lh build/static/js/*.js
+
+      # Step 5: Comprehensive PR Review Comment
+      - name: Generate PR Review
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            // Get PR details
+            const { owner, repo, number } = context.issue;
+            
+            // Get changed files
+            const response = await github.rest.pulls.listFiles({
+              owner,
+              repo,
+              pull_number: number
+            });
+            
+            const changedFiles = response.data.map(file => file.filename);
+            
+            // Generate review comment
+            let review = `## 🤖 Automated PR Review\n\n`;
+            
+            // Add changed files summary
+            review += `### 📝 Changed Files (${changedFiles.length})\n`;
+            changedFiles.forEach(file => {
+              review += `- \`${file}\`\n`;
+            });
+            
+            // Add test coverage if available
+            try {
+              const clientCoverage = JSON.parse(fs.readFileSync('client/coverage/coverage-summary.json'));
+              review += `\n### 🧪 Test Coverage\n`;
+              review += `#### Frontend\n`;
+              review += `- Statements: ${clientCoverage.total.statements.pct}%\n`;
+              review += `- Functions: ${clientCoverage.total.functions.pct}%\n`;
+            } catch (e) {
+              review += `\n⚠️ No coverage report found for frontend\n`;
+            }
+            
+            // Add checklist
+            review += `\n### 🔍 Review Checklist\n`;
+            review += `- [ ] Tests added for new features\n`;
+            review += `- [ ] Documentation updated\n`;
+            review += `- [ ] No console.log statements\n`;
+            review += `- [ ] Error handling implemented\n`;
+            
+            // Add suggestions based on common patterns
+            review += `\n### 💡 Suggestions\n`;
+            if (changedFiles.some(f => f.endsWith('.js'))) {
+              review += `- Consider adding JSDoc comments for functions\n`;
+            }
+            if (changedFiles.some(f => f.includes('test'))) {
+              review += `- Ensure test descriptions are clear and specific\n`;
+            }
+            
+            // Post the review comment
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: review
+            }); 
